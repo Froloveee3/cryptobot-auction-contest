@@ -7,7 +7,7 @@
 - **Сайт (Frontend)**: `https://www.cryptobot-auction-contest.ru` (также доступен `https://cryptobot-auction-contest.ru`)
 - **API**: `https://api.cryptobot-auction-contest.ru/api`
 - **WS (Socket.IO namespace `/auctions`)**: `https://ws.cryptobot-auction-contest.ru`
-- **Видео‑демо**: **TODO — вставить ссылку** (YouTube/Loom/etc.)
+- **Видео‑демо**: `https://drive.google.com/file/d/1uOwDzdaZuKa5kakU-Dp3-ycTJeExXx5N/view?usp=sharing`
 
 ## Что внутри
 
