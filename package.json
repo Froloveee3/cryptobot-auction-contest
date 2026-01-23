@@ -1,0 +1,55 @@
+{
+  "name": "cryptobot-auction",
+  "version": "1.0.0",
+  "description": "Telegram Gift Auctions-like system - Monorepo",
+  "private": true,
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+
+    "// =====================": "",
+    "// Docker helpers": "",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build",
+    "docker:logs": "docker compose logs -f",
+
+    "// ======================": "",
+    "// Infra-only helpers (mongo/redis + rs init)": "",
+    "infra:up": "docker compose up -d mongodb redis",
+    "rs:init:docker": "docker compose up -d mongodb-init",
+    "rs:init:host": "docker compose --profile hybrid up -d mongodb-init-host",
+
+    "// =======================": "",
+    "// Local dev (no env edits needed between modes)": "",
+    "start:backend": "npm run infra:up && npm run rs:init:host && docker compose stop backend || exit 0 && cd backend && npm run start:dev",
+    "start:frontend": "docker compose stop frontend || exit 0 && cd frontend && npm start",
+
+    "// Optional convenience presets": "",
+    "dev:docker": "npm run docker:up",
+    "dev:backend-local": "docker compose up -d frontend mongodb redis && npm run start:backend",
+    "dev:frontend-local": "docker compose up -d backend mongodb redis && npm run rs:init:docker && npm run start:frontend",
+    "dev:both-local": "docker compose up -d mongodb redis && npm run start:backend",
+    "dev:both-local:frontend": "npm run start:frontend",
+
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:all": "npm run build:backend && npm run build:frontend",
+
+    "// ========================": "",
+    "// Manual scripted scenarios": "",
+    "test:manual": "node scripts/manual-tests/run.js"
+  },
+  "keywords": [
+    "auction",
+    "telegram",
+    "gifts",
+    "backend",
+    "frontend"
+  ],
+  "author": "",
+  "license": "UNLICENSED"
+}

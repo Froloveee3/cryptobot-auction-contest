@@ -1,0 +1,430 @@
+{
+  "info": {
+    "name": "CryptoBot Auction - Manual API Flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection to verify the full auction flow end-to-end."
+  },
+  "item": [
+    {
+      "name": "00 - Health",
+      "item": [
+        {
+          "name": "GET /metrics (health check)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/metrics"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "POST /auth/register (User 1)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('user1Username')) {",
+                  "  const u = 'judge' + pm.variables.replaceIn('{{$randomInt}}');",
+                  "  pm.environment.set('user1Username', u);",
+                  "}",
+                  "if (!pm.environment.get('userPassword')) pm.environment.set('userPassword', 'password123');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('user1Token', j.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{user1Username}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "POST /auth/register (User 2)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('user2Username')) {",
+                  "  const u = 'judge' + pm.variables.replaceIn('{{$randomInt}}');",
+                  "  pm.environment.set('user2Username', u);",
+                  "}",
+                  "if (!pm.environment.get('userPassword')) pm.environment.set('userPassword', 'password123');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('user2Token', j.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{user2Username}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "POST /auth/login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('adminToken', j.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "POST /auth/refresh (User 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('user1Token', j.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user1Token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Balance",
+      "item": [
+        {
+          "name": "POST /users/me/deposit (User 1)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.response.to.have.status(200);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user1Token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": {{depositAmount}}\n}" },
+            "url": "{{baseUrl}}/users/me/deposit"
+          }
+        },
+        {
+          "name": "POST /users/me/deposit (User 2)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.response.to.have.status(200);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user2Token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": {{depositAmount}}\n}" },
+            "url": "{{baseUrl}}/users/me/deposit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Auction",
+      "item": [
+        {
+          "name": "POST /auctions (create, bots enabled) [User 1]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('auctionId', j._id || j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user1Token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Judge Auction\",\n  \"description\": \"Manual flow via Postman\",\n  \"totalRounds\": 3,\n  \"winnersPerRound\": 5,\n  \"roundDuration\": 30,\n  \"minBid\": 1000,\n  \"minIncrement\": 100,\n  \"antiSnipingWindow\": 10,\n  \"antiSnipingExtension\": 10,\n  \"botsEnabled\": true,\n  \"botsCount\": 6\n}"
+            },
+            "url": "{{baseUrl}}/auctions"
+          }
+        },
+        {
+          "name": "POST /auctions/:id/start [User 1]",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.response.to.have.status(200);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user1Token}}" }],
+            "url": "{{baseUrl}}/auctions/{{auctionId}}/start"
+          }
+        },
+        {
+          "name": "GET /auctions/:id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/auctions/{{auctionId}}" }
+        },
+        {
+          "name": "GET /auctions/:id/rounds",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/auctions/{{auctionId}}/rounds" }
+        }
+      ]
+    },
+    {
+      "name": "04 - Bids",
+      "item": [
+        {
+          "name": "POST /auctions/:auctionId/bids (new) [User 1]",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.response.to.have.status(201);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user1Token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": {{newBidAmount}},\n  \"mode\": \"new\",\n  \"recipient\": null\n}" },
+            "url": "{{baseUrl}}/auctions/{{auctionId}}/bids"
+          }
+        },
+        {
+          "name": "POST /auctions/:auctionId/bids (new) [User 2]",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.response.to.have.status(201);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user2Token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": {{newBidAmount}},\n  \"mode\": \"new\",\n  \"recipient\": null\n}" },
+            "url": "{{baseUrl}}/auctions/{{auctionId}}/bids"
+          }
+        },
+        {
+          "name": "POST /auctions/:auctionId/bids (raise) [User 1]",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.response.to.have.status(201);"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user1Token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": {{raiseDelta}},\n  \"mode\": \"raise\",\n  \"recipient\": null\n}" },
+            "url": "{{baseUrl}}/auctions/{{auctionId}}/bids"
+          }
+        },
+        {
+          "name": "GET /auctions/:auctionId/bids?page=1&limit=20",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/auctions/{{auctionId}}/bids?page=1&limit=20" }
+        }
+      ]
+    },
+    {
+      "name": "05 - Profile (User 1)",
+      "item": [
+        {
+          "name": "GET /users/me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user1Token}}" }],
+            "url": "{{baseUrl}}/users/me"
+          }
+        },
+        {
+          "name": "GET /users/me/bids?page=1&limit=20",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user1Token}}" }],
+            "url": "{{baseUrl}}/users/me/bids?page=1&limit=20"
+          }
+        },
+        {
+          "name": "GET /users/me/transactions?page=1&limit=20",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user1Token}}" }],
+            "url": "{{baseUrl}}/users/me/transactions?page=1&limit=20"
+          }
+        },
+        {
+          "name": "GET /users/me/collection?page=1&limit=20",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user1Token}}" }],
+            "url": "{{baseUrl}}/users/me/collection?page=1&limit=20"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Bots (optional, admin)",
+      "item": [
+        {
+          "name": "POST /users (create bot user) [admin]",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('botUsername')) {",
+                  "  const u = '_bot' + pm.variables.replaceIn('{{$randomInt}}');",
+                  "  pm.environment.set('botUsername', u);",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(201);",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('botUserId', j._id || j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{botUsername}}\",\n  \"initialBalance\": 50000\n}" },
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "POST /bots (create) [admin]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(201);",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('botId', j._id || j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Judge Bot\",\n  \"type\": \"simple\",\n  \"userId\": \"{{botUserId}}\",\n  \"auctionId\": \"{{auctionId}}\",\n  \"minAmount\": 1000,\n  \"maxAmount\": 10000,\n  \"minInterval\": 5000,\n  \"maxInterval\": 30000\n}"
+            },
+            "url": "{{baseUrl}}/bots"
+          }
+        },
+        {
+          "name": "POST /bots/:id/start [admin]",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/bots/{{botId}}/start"
+          }
+        },
+        {
+          "name": "GET /bots?auctionId=... [admin]",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/bots?auctionId={{auctionId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
