@@ -2,11 +2,6 @@
 
 Монорепо: **NestJS backend** + **React frontend** для системы многораундовых аукционов с real‑time обновлениями (Socket.IO), ботами и анти‑снайпингом.
 
-## Действующий сайт / демо
-
-- **API**: `https://api.cryptobot-auction-contest.ru/api`
-- **WS (Socket.IO namespace `/auctions`)**: `https://ws.cryptobot-auction-contest.ru`
-
 ## Что внутри
 
 - **Backend**: NestJS, MongoDB (replica set для транзакций), Redis, BullMQ, Socket.IO, Prometheus `/api/metrics`
